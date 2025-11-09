@@ -1,32 +1,42 @@
-############################################################################
-## Django ORM Standalone Python Template
-############################################################################
-""" Here we'll import the parts of Django we need. It's recommended to leave
-these settings as is, and skip to START OF APPLICATION section below """
-
-# Turn off bytecode generation
-import sys
-sys.dont_write_bytecode = True
-
-# Import settings
 import os
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
-
-# setup django environment
 import django
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
 django.setup()
 
-# Import your models for use in your script
-from db.models import *
+from db.models import Product
 
-############################################################################
-## START OF APPLICATION
-############################################################################
-""" Replace the code below with your own """
+import os
+import django
 
-# Seed a few users in the database
-User.objects.create(name='Dan')
-User.objects.create(name='Robert')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
+django.setup()
 
-for u in User.objects.all():
-    print(f'ID: {u.id} \tUsername: {u.name}')
+from db.models import Product
+
+def populate_products():
+    products = [
+        {"upc": "123456789012", "name": "Apple", "price": 0.99},
+        {"upc": "987654321098", "name": "Banana", "price": 0.69},
+        {"upc": "456789123456", "name": "Orange Juice", "price": 3.49},
+        {"upc": "654321987654", "name": "Bread", "price": 2.99},
+    ]
+    for p in products:
+        Product.objects.get_or_create(
+            upc=p["upc"],
+            defaults={"name": p["name"], "price": p["price"]}
+        )
+
+def scan_product():
+    upc_input = input("Enter UPC code: ").strip()
+    try:
+        product = Product.objects.get(upc=upc_input)
+        print(f"Product: {product.name}\nPrice: ${product.price}")
+    except Product.DoesNotExist:
+        print("Product not found!")
+
+if __name__ == "__main__":
+    populate_products()
+    print("Database populated with sample products.")
+    while True:
+        scan_product()
